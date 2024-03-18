@@ -64,9 +64,17 @@ def prepare_segmenter_environment():
     source_path = os.path.join(dis_repo_path, "IS-Net", "*")
     files_to_move = glob.glob(source_path)
 
+    # for file_path in files_to_move:
+    #     destination = os.path.join(base_path, os.path.basename(file_path))
+    #     shutil.move(file_path, destination)
+
     for file_path in files_to_move:
         destination = os.path.join(base_path, os.path.basename(file_path))
-        shutil.move(file_path, destination)
+        if not os.path.exists(destination):  # Check if the destination file does not exist
+            shutil.move(file_path, destination)
+        else:
+            print(f"File {os.path.basename(file_path)} already exists at destination. Skipping move.")
+
 
     # Delete the entire git directory
     shutil.rmtree(git_path, ignore_errors=True)
@@ -79,12 +87,17 @@ def init():
     warnings.filterwarnings("ignore", category=FutureWarning)
     warnings.filterwarnings("ignore", category=UserWarning)
 
-    init_captioner()
+    # init_captioner()
 
     model_path = prepare_upscaler_environment()
     init_upscaler(model_path)
 
-    saved_models_path = prepare_segmenter_environment()
+    
+    saved_models_path = os.path.join(base_path, "saved_models")
+    model_file_path = os.path.join(saved_models_path, "isnet-general-use.pth")
+    if not os.path.exists(model_file_path):
+        saved_models_path = prepare_segmenter_environment()
+    
     init_segmenter(saved_models_path)
 
     init_depth_estimator()

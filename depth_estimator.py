@@ -10,15 +10,18 @@ feature_extractor = None
 def init():
     global depth_estimator, feature_extractor
 
-    print("### ComfyUI-Background-Replacement: Initializing depth estimator...")
-
-    depth_estimator = DPTForDepthEstimation.from_pretrained(
-        "Intel/dpt-hybrid-midas").to("cuda")
-    feature_extractor = DPTFeatureExtractor.from_pretrained(
-        "Intel/dpt-hybrid-midas")
 
 
 def get_depth_map(image):
+    global depth_estimator, feature_extractor
+    if not depth_estimator:
+        print("### ComfyUI-Background-Replacement: Initializing depth estimator...")
+
+        depth_estimator = DPTForDepthEstimation.from_pretrained(
+            "Intel/dpt-hybrid-midas").to("cuda")
+        feature_extractor = DPTFeatureExtractor.from_pretrained(
+            "Intel/dpt-hybrid-midas")
+
     original_size = image.size
 
     image = feature_extractor(

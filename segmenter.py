@@ -15,46 +15,48 @@ net = None
 
 
 def init(saved_models_path):
-    global device, ISNetDIS, normalize, im_preprocess, hypar, net
+    global device, ISNetDIS, normalize, im_preprocess, hypar, net, g_saved_models_path
 
-    print("### ComfyUI-Background-Replacement: Initializing segmenter...")
+    g_saved_models_path = saved_models_path
 
-    from .models.isnet import ISNetDIS
-    from .data_loader_cache import normalize, im_preprocess
+    # print("### ComfyUI-Background-Replacement: Initializing segmenter...")
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # ISNetDIS = models.ISNetDIS
-    # normalize = data_loader_cache.normalize
-    # im_preprocess = data_loader_cache.im_preprocess
+    # from .models.isnet import ISNetDIS
+    # from .data_loader_cache import normalize, im_preprocess
 
-    # Set Parameters
-    hypar = {}  # paramters for inferencing
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # # ISNetDIS = models.ISNetDIS
+    # # normalize = data_loader_cache.normalize
+    # # im_preprocess = data_loader_cache.im_preprocess
 
-    # load trained weights from this path
-    hypar["model_path"] = saved_models_path  # "./saved_models"
-    # name of the to-be-loaded weights
-    hypar["restore_model"] = "isnet-general-use.pth"
-    # indicate if activate intermediate feature supervision
-    hypar["interm_sup"] = False
+    # # Set Parameters
+    # hypar = {}  # paramters for inferencing
 
-    # choose floating point accuracy --
-    # indicates "half" or "full" accuracy of float number
-    hypar["model_digit"] = "full"
-    hypar["seed"] = 0
+    # # load trained weights from this path
+    # hypar["model_path"] = saved_models_path  # "./saved_models"
+    # # name of the to-be-loaded weights
+    # hypar["restore_model"] = "isnet-general-use.pth"
+    # # indicate if activate intermediate feature supervision
+    # hypar["interm_sup"] = False
 
-    # cached input spatial resolution, can be configured into different size
-    hypar["cache_size"] = [1024, 1024]
+    # # choose floating point accuracy --
+    # # indicates "half" or "full" accuracy of float number
+    # hypar["model_digit"] = "full"
+    # hypar["seed"] = 0
 
-    # data augmentation parameters ---
-    # mdoel input spatial size, usually use the same value hypar["cache_size"], which means we don't further resize the images
-    hypar["input_size"] = [1024, 1024]
-    # random crop size from the input, it is usually set as smaller than hypar["cache_size"], e.g., [920,920] for data augmentation
-    hypar["crop_size"] = [1024, 1024]
+    # # cached input spatial resolution, can be configured into different size
+    # hypar["cache_size"] = [1024, 1024]
 
-    hypar["model"] = ISNetDIS()
+    # # data augmentation parameters ---
+    # # mdoel input spatial size, usually use the same value hypar["cache_size"], which means we don't further resize the images
+    # hypar["input_size"] = [1024, 1024]
+    # # random crop size from the input, it is usually set as smaller than hypar["cache_size"], e.g., [920,920] for data augmentation
+    # hypar["crop_size"] = [1024, 1024]
 
-    # Build Model
-    net = build_model(hypar, device)
+    # hypar["model"] = ISNetDIS()
+
+    # # Build Model
+    # net = build_model(hypar, device)
 
 
 class GOSNormalize(object):
@@ -142,6 +144,50 @@ def predict(net, inputs_val, shapes_val, hypar, device):
 
 
 def segment(image):
+    global device, ISNetDIS, normalize, im_preprocess, hypar, net, g_saved_models_path
+
+    if not device:
+
+        print("### ComfyUI-Background-Replacement: Initializing segmenter...")
+
+        from .models.isnet import ISNetDIS
+        from .data_loader_cache import normalize, im_preprocess
+
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        # ISNetDIS = models.ISNetDIS
+        # normalize = data_loader_cache.normalize
+        # im_preprocess = data_loader_cache.im_preprocess
+
+        # Set Parameters
+        hypar = {}  # paramters for inferencing
+
+        # load trained weights from this path
+        hypar["model_path"] = saved_models_path  # "./saved_models"
+        # name of the to-be-loaded weights
+        hypar["restore_model"] = "isnet-general-use.pth"
+        # indicate if activate intermediate feature supervision
+        hypar["interm_sup"] = False
+
+        # choose floating point accuracy --
+        # indicates "half" or "full" accuracy of float number
+        hypar["model_digit"] = "full"
+        hypar["seed"] = 0
+
+        # cached input spatial resolution, can be configured into different size
+        hypar["cache_size"] = [1024, 1024]
+
+        # data augmentation parameters ---
+        # mdoel input spatial size, usually use the same value hypar["cache_size"], which means we don't further resize the images
+        hypar["input_size"] = [1024, 1024]
+        # random crop size from the input, it is usually set as smaller than hypar["cache_size"], e.g., [920,920] for data augmentation
+        hypar["crop_size"] = [1024, 1024]
+
+        hypar["model"] = ISNetDIS()
+
+        # Build Model
+        net = build_model(hypar, device)
+
+        
     # Load the image and get the image tensor and original size
     image_tensor, orig_size = load_image(image, hypar)
     # Predict the segmentation mask using the neural network
