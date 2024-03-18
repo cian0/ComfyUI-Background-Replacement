@@ -162,7 +162,7 @@ def segment(image):
         hypar = {}  # paramters for inferencing
 
         # load trained weights from this path
-        hypar["model_path"] = saved_models_path  # "./saved_models"
+        hypar["model_path"] = g_saved_models_path  # "./saved_models"
         # name of the to-be-loaded weights
         hypar["restore_model"] = "isnet-general-use.pth"
         # indicate if activate intermediate feature supervision
